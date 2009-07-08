@@ -1,12 +1,25 @@
 use strict;
 use warnings;
 
+#####
+#
+# Version history
+#
+# 0.2
+#	Modify to use new API keys, much better!
+# 0.1
+#	Initial working version
+#
+
 # irssi imports
 use Irssi;
 use Irssi::Irc;
 use vars qw($VERSION %IRSSI %config);
 
-$VERSION = "0.1";
+use LWP::UserAgent;
+
+$VERSION = "0.2";
+
 %IRSSI = (
 	authors => "Denis Lemire",
 	contact => "denis\@lemire.name",
@@ -18,8 +31,6 @@ $VERSION = "0.1";
 );
 
 $config{away_level} = 0;
-$config{prowluser} = '';
-$config{prowlpass} = '';
 $config{awayreason} = 'Auto-away because client has disconnected from proxy.';
 $config{debug} = 0;
 $config{clientcount} = 0;
@@ -39,14 +50,24 @@ sub send_prowl
 
 	debug("Sending prowl");
 
-	use LWP::UserAgent;
-
-	# Grab our options.
 	my %options = ();
 
-	$options{'application'} = 'IRSSI';
+	$options{'application'} ||= "Irssi";
 	$options{'event'} = $event;
 	$options{'notification'} = $text;
+	$options{'priority'} ||= 0;
+
+	# Get the API key from STDIN if one isn't provided via a file or from the command line.
+
+	if (open(APIKEYFILE, $ENV{HOME} . "/.prowlkey")) {
+		$options{apikey} = <APIKEYFILE>;
+
+		chomp $options{apikey};
+
+		close(APIKEYFILE); 
+	} else {
+		debug ("Unable to open prowl key file\n");
+	}
 
 	# URL encode our arguments
 	$options{'application'} =~ s/([^A-Za-z0-9])/sprintf("%%%02X", ord($1))/seg;
@@ -58,22 +79,23 @@ sub send_prowl
 	$userAgent = LWP::UserAgent->new;
 	$userAgent->agent("ProwlScript/1.0");
 
-	$requestURL = sprintf("https://prowl.weks.net/api/add_notification.php?application=%s&event=%s&description=%s",
-				$options{'application'},
-				$options{'event'},
-				$options{'notification'});
+	$requestURL = sprintf("https://prowl.weks.net/publicapi/add?apikey=%s&application=%s&event=%s&description=%s&priority=%d",
+					$options{'apikey'},
+					$options{'application'},
+					$options{'event'},
+					$options{'notification'},
+					$options{'priority'});
 
 	$request = HTTP::Request->new(GET => $requestURL);
-	$request->authorization_basic($config{'prowluser'}, $config{'prowlpass'});
 
 	$response = $userAgent->request($request);
 
 	if ($response->is_success) {
-
+		debug ("Notification successfully posted.\n");
 	} elsif ($response->code == 401) {
-	#	print STDERR "Notification not posted: incorrect username or password.\n";
+		debug ("Notification not posted: incorrect API key.\n");
 	} else {
-	#	print STDERR "Notification not posted: " . $response->status_line . "\n";
+		debug ("Notification not posted: " . $response->content . "\n");
 	}
 }
 
