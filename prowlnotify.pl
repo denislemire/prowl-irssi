@@ -5,6 +5,8 @@ use warnings;
 #
 # Version history
 #
+# 0.4
+#	Push hilights
 # 0.3
 #	Add ability to toggle prowl mode (on/off/auto)
 # 0.2
@@ -163,6 +165,19 @@ sub msg_pri
 	}
 }
 
+sub msg_hilight
+{
+	my ($dest, $text, $stripped) = @_;
+
+	my $server = $dest->{server};
+
+	if ($dest->{level} & MSGLEVEL_HILIGHT) {
+		if ($server->{usermode_away} == "1" || $config{mode} eq 'on') {
+			send_prowl ("Highlight", $stripped);
+		}
+	}
+}
+
 sub cmd_prowl
 {
 	my ($args, $server, $winit) = @_;
@@ -190,3 +205,4 @@ Irssi::signal_add_last('proxy client disconnected', 'client_disconnect');
 Irssi::signal_add_last('message public', 'msg_pub');
 Irssi::signal_add_last('message private', 'msg_pri');
 Irssi::command_bind 'prowl' => \&cmd_prowl;
+Irssi::signal_add_last("print text", "msg_hilight");

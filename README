@@ -27,7 +27,3 @@ TODO
 
   * Use Irssi's settings_get_str/settings_add_str functions for storing the
     prowl key?
-
-  * Send push notifications on hilights (currently only private messages and
-    mentions are pushed.
-
