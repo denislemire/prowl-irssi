@@ -149,7 +149,7 @@ sub msg_pub
 {
 	my ($server, $data, $nick, $mask, $target) = @_;
 	 
-	if (($server->{usermode_away} == "1" || $config{prowl} eq 'on')  && ($data =~ /$server->{nick}/i)) {
+	if (($server->{usermode_away} == "1" || $config{mode} eq 'on')  && ($data =~ /$server->{nick}/i)) {
 		debug("Got pub msg with my name");
 		send_prowl ("Mention", $nick . ': ' . $data);
 	}
