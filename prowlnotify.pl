@@ -195,6 +195,9 @@ sub cmd_prowl
 			Irssi::print("Prowl mode: $args (was " . $config{mode} . ')' );
 			$config{mode} = $args;
 		}
+	} elsif ($args =~/^test$/) {
+		Irssi::print("Sending test prowl notification");
+		send_prowl ("Test", "If you can read this, it worked.");
 	} else {
 		Irssi::print('Prowl: Say what?!');
 	}
