@@ -198,6 +198,14 @@ sub cmd_prowl
 	} elsif ($args =~/^test$/) {
 		Irssi::print("Sending test prowl notification");
 		send_prowl ("Test", "If you can read this, it worked.");
+	} elsif ($args =~/^debug$/) {
+		if ($config{debug}) {
+			$config{debug} = 0;
+			Irssi::print("Prowl debug disabled");
+		} else {
+			$config{debug} = 1;
+			Irssi::print("Prowl debug enabled");
+		}
 	} else {
 		Irssi::print('Prowl: Say what?!');
 	}
