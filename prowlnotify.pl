@@ -89,7 +89,7 @@ sub send_prowl
 	$userAgent = LWP::UserAgent->new;
 	$userAgent->agent("ProwlScript/1.0");
 
-	$requestURL = sprintf("https://prowl.weks.net/publicapi/add?apikey=%s&application=%s&event=%s&description=%s&priority=%d",
+	$requestURL = sprintf("https://prowlapp.com/publicapi/add?apikey=%s&application=%s&event=%s&description=%s&priority=%d",
 					$options{'apikey'},
 					$options{'application'},
 					$options{'event'},
