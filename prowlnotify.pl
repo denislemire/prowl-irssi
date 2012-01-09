@@ -111,39 +111,31 @@ sub send_prowl
 
 sub client_connect
 {
-	my (@servers) = Irssi::servers;
- 
+	my $client = shift;
+	my $server = $client->{server};
+	 
 	$config{clientcount}++;
 	debug("Client connected.");
 
-	# setback
-	foreach my $server (@servers) {
-		# if you're away on that server send yourself back
-		if ($server->{usermode_away} == 1) {
-			$server->send_raw('AWAY :');
-		}
+	if ($server->{usermode_away}) {
+		$server->send_raw('AWAY :');
 	}
 }
 
 sub client_disconnect
 {
-	my (@servers) = Irssi::servers;
+	my $client = shift;
+	my $server = $client->{server};
 	debug('Client Disconnectted');
 
 	$config{clientcount}-- unless $config{clientcount} == 0;
 
-	# setaway
-	if ($config{clientcount} <= $config{away_level}) {
-		# ok.. we have the away_level of clients connected or less.
-		foreach my $server (@servers) {
-			if ($server->{usermode_away} == "0") {
-				# we are not away on this server allready.. set the autoaway
-				# reason
-				$server->send_raw(
-					'AWAY :' . $config{awayreason}
-				);
-			}
-		}
+	unless ($server->{usermode_away}) {
+		# we are not away on this server already.. set the autoaway
+		# reason
+		$server->send_raw(
+			'AWAY :' . $config{awayreason}
+		);
 	}
 }
 
